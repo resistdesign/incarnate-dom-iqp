@@ -42,6 +42,15 @@ const DisplayBox = styled.div`
   justify-content: flex-start;
   max-height: 25em;
   overflow: auto;
+  
+  & > h3 {
+    position: sticky;
+    top: 1em;
+    margin: 0.5em;
+    padding: 0.5em;
+    background-color: lightgray;
+    border-radius: 1em;
+  }
 `;
 const DisplayButton = styled(DisplayBox)`
   cursor: pointer;
@@ -49,12 +58,17 @@ const DisplayButton = styled(DisplayBox)`
   border-radius: 1em;
   justify-content: center;
   
+  & > h3 {
+    background-color: unset;
+  }
+  
   &:hover {
     background-color: #fefefe;
   }
   
   &:active {
     background-color: #333333;
+    color: #ffffff;
   }
 `;
 
