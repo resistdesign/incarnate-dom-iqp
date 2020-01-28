@@ -64,15 +64,17 @@ export default class ItemQueueProcessor extends Component {
             setOutputMap: 'OutputMap'
           }}
           strict
-          factory={({
-                      itemProcessor,
-                      queue,
-                      getInputMap,
-                      getOutputMap,
-                      setProcessing,
-                      setInputMap,
-                      setOutputMap
-                    }) => {
+          factory={async ({
+                            itemProcessor,
+                            queue,
+                            getInputMap,
+                            getOutputMap,
+                            setProcessing,
+                            setInputMap,
+                            setOutputMap
+                          }) => {
+            await new Promise(res => setTimeout(res, batchDelayMS));
+
             const itemsToProcess = queue.getNValues(batchSize);
             const itemIdList = Object.keys(itemsToProcess);
 
@@ -124,7 +126,7 @@ export default class ItemQueueProcessor extends Component {
                 setInputMap(newInputMap);
               };
 
-              setTimeout(() => process(), batchDelayMS);
+              process();
             }
 
             return true;
