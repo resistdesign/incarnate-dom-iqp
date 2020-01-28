@@ -109,6 +109,7 @@ export class App extends Component {
               ItemProcessor: 'ItemProcessor'
             }}
             batchSize={3}
+            batchDelayMS={1500}
           />
           <Row>
             <LifePod

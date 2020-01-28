@@ -11,12 +11,14 @@ export default class ItemQueueProcessor extends Component {
       OutputMap: T.string,
       ItemProcessor: T.string
     }),
-    batchSize: T.number
+    batchSize: T.number,
+    batchDelayMS: T.number
   };
 
   render() {
     const {
       batchSize = 5,
+      batchDelayMS = 0,
       ...props
     } = this.props;
 
@@ -122,7 +124,7 @@ export default class ItemQueueProcessor extends Component {
                 setInputMap(newInputMap);
               };
 
-              process();
+              setTimeout(() => process(), batchDelayMS);
             }
 
             return true;
