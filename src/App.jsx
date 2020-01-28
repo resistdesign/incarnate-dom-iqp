@@ -78,11 +78,16 @@ export class App extends Component {
               parentItemID: 'ParentItemID'
             }}
             strict
-            factory={({parentItemID}) => async ({id, ...item} = {}) => await new Promise(res => setTimeout(() => res({
-              id: `SAVED_${id}`,
-              parentItemID,
-              ...item
-            }), 1500))}
+            factory={({parentItemID}) => async ({id, ...item} = {}) => await new Promise((res, rej) => setTimeout(
+              () => Math.random() < 0.3 ?
+                rej(new Error('Unknown Error')) :
+                res({
+                  id: `SAVED_${id}`,
+                  parentItemID,
+                  ...item
+                }),
+              1500
+            ))}
           />
           <LifePod
             name='RunningCount'
