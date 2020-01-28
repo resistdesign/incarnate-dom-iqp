@@ -3,7 +3,8 @@ import React, {Component} from 'react';
 import styled, {createGlobalStyle} from 'styled-components';
 import Incarnate, {LifePod} from 'incarnate-dom';
 import UUIDV4 from 'uuid/v4';
-import Queue from './App/Utils/Queue';
+import ItemQueueProcessor from './App/Utils/ItemQueueProcessor';
+import T from 'prop-types';
 
 const GlobalStyle = createGlobalStyle`
 html,
@@ -68,101 +69,41 @@ export class App extends Component {
           name='TransformPairs'
         >
           <LifePod
-            name='RunningCount'
-            factory={() => 0}
+            name='ParentItemID'
+            factory={() => UUIDV4()}
           />
           <LifePod
-            name='ProcessingRequests'
-            factory={() => false}
+            name='ItemProcessor'
+            dependencies={{
+              parentItemID: 'ParentItemID'
+            }}
+            strict
+            factory={({parentItemID}) => async ({id, ...item} = {}) => await new Promise(res => setTimeout(() => res({
+              id: `SAVED_${id}`,
+              parentItemID,
+              ...item
+            }), 1500))}
+          />
+          <LifePod
+            name='RunningCount'
+            factory={() => 0}
           />
           <LifePod
             name='Map'
             factory={() => ({})}
           />
           <LifePod
-            name='Queue'
-            factory={() => new Queue()}
-          />
-          <LifePod
             name='Existing'
             factory={() => ({})}
           />
-          <LifePod
-            name='UpdateQueue'
-            dependencies={{
-              queue: 'Queue',
-              map: 'Map'
+          <ItemQueueProcessor
+            name='MapQueueProcessor'
+            shared={{
+              InputMap: 'Map',
+              OutputMap: 'Existing',
+              ItemProcessor: 'ItemProcessor'
             }}
-            factory={({queue, map = {}}) => {
-              queue.addKeys(map);
-
-              return true;
-            }}
-          />
-          <LifePod
-            name='ProcessQueue'
-            dependencies={{
-              queue: 'Queue',
-              map: 'Map'
-            }}
-            getters={{
-              getMap: 'Map',
-              getExisting: 'Existing'
-            }}
-            setters={{
-              setProcessingRequests: 'ProcessingRequests',
-              setMap: 'Map',
-              setExisting: 'Existing'
-            }}
-            factory={({
-                        queue,
-                        getMap,
-                        getExisting,
-                        setProcessingRequests,
-                        setMap,
-                        setExisting
-                      }) => {
-              const valuesToProcess = queue.getNValues(5);
-              const valueKeys = Object.keys(valuesToProcess);
-
-              if (valueKeys.length > 0) {
-                const process = async () => {
-                  const removedKeys = [];
-                  const existingMap = {};
-
-                  setProcessingRequests(true);
-                  for (let i = 0; i < valueKeys.length; i++) {
-                    const k = valueKeys[i];
-                    const v = valuesToProcess[k];
-
-                    await new Promise(res => setTimeout(res, 1500));
-                    existingMap[k] = v;
-
-                    removedKeys.push(k);
-                  }
-                  setProcessingRequests(false);
-
-                  const newMap = {
-                    ...getMap()
-                  };
-
-                  removedKeys.forEach(k => {
-                    delete newMap[k];
-                  });
-
-                  queue.removeKeys(valuesToProcess);
-                  setExisting({
-                    ...getExisting(),
-                    ...existingMap
-                  });
-                  setMap(newMap);
-                };
-
-                process();
-              }
-
-              return true;
-            }}
+            batchSize={3}
           />
           <Row>
             <LifePod
@@ -215,13 +156,13 @@ export class App extends Component {
               <LifePod
                 dependencies={{
                   runningCount: 'RunningCount',
-                  processingRequests: 'ProcessingRequests',
+                  processingRequests: 'MapQueueProcessor.Processing',
                   existing: 'Existing'
                 }}
               >
                 {({runningCount, processingRequests, existing = {}}) => (
                   <span>
-                    {!processingRequests ? 'No' : 'Yes'}<br/>
+                    {!!processingRequests ? 'Yes' : 'No'}<br/>
                     Created: {Object.keys(existing).length} out of {runningCount}
                   </span>
                 )}

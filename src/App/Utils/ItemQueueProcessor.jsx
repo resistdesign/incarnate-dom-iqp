@@ -8,15 +8,14 @@ export default class ItemQueueProcessor extends Component {
     ...Incarnate.propTypes,
     shared: T.shape({
       InputMap: T.string,
-      OutputMap: T.string
+      OutputMap: T.string,
+      ItemProcessor: T.string
     }),
-    itemProcessor: T.string,
     batchSize: T.number
   };
 
   render() {
     const {
-      itemProcessor,
       batchSize = 5,
       ...props
     } = this.props;
@@ -33,10 +32,10 @@ export default class ItemQueueProcessor extends Component {
           name='QueueUpdater'
           dependencies={{
             queue: 'Queue',
-            map: 'InputMap'
+            inputMap: 'InputMap'
           }}
-          factory={({queue, map = {}}) => {
-            queue.addKeys(map);
+          factory={({queue, inputMap = {}}) => {
+            queue.addKeys(inputMap);
 
             return true;
           }}
@@ -48,7 +47,10 @@ export default class ItemQueueProcessor extends Component {
         <LifePod
           name='QueueProcessor'
           dependencies={{
-            queue: 'Queue'
+            itemProcessor: 'ItemProcessor',
+            queue: 'Queue',
+            // TRICKY: Watched but unused.
+            inputMap: 'InputMap'
           }}
           getters={{
             getInputMap: 'InputMap',
@@ -56,10 +58,12 @@ export default class ItemQueueProcessor extends Component {
           }}
           setters={{
             setProcessing: 'Processing',
-            getInputMap: 'InputMap',
+            setInputMap: 'InputMap',
             setOutputMap: 'OutputMap'
           }}
+          strict
           factory={({
+                      itemProcessor,
                       queue,
                       getInputMap,
                       getOutputMap,
@@ -82,7 +86,7 @@ export default class ItemQueueProcessor extends Component {
                   const item = itemsToProcess[id];
 
                   promises.push(new Promise(
-                    async (res, rej) => {
+                    async res => {
                       try {
                         const returnItem = await itemProcessor(item);
                         const {
@@ -94,6 +98,8 @@ export default class ItemQueueProcessor extends Component {
                       } catch (error) {
                         // Ignore.
                       }
+
+                      res();
                     }
                   ));
                 }
