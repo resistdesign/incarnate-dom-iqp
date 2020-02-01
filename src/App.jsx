@@ -4,7 +4,6 @@ import styled, {createGlobalStyle} from 'styled-components';
 import Incarnate, {LifePod} from 'incarnate-dom';
 import UUIDV4 from 'uuid/v4';
 import ItemQueueProcessor from './App/Utils/ItemQueueProcessor';
-import T from 'prop-types';
 
 const GlobalStyle = createGlobalStyle`
 html,

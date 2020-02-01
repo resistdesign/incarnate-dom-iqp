@@ -1,5 +1,5 @@
 import T from 'prop-types';
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 import Incarnate, {LifePod} from 'incarnate-dom';
 import Queue from './Queue';
 
