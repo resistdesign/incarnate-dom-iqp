@@ -250,6 +250,12 @@ export class App extends Component {
                             >
                               Retry
                             </button>
+                            &nbsp;
+                            <button
+                              onClick={() => mapQueueProcessorController.dismissError(k, true)}
+                            >
+                              Cancel
+                            </button>
                           </li>
                         ))}
                       </ul>

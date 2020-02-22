@@ -7,7 +7,17 @@ export default class ItemQueueProcessorController {
   /**
    * @type {Function}
    * */
+  getInputMap;
+
+  /**
+   * @type {Function}
+   * */
   getErrorMap;
+
+  /**
+   * @type {Function}
+   * */
+  setInputMap;
 
   /**
    * @type {Function}
@@ -23,11 +33,15 @@ export default class ItemQueueProcessorController {
     Object.assign(this, config);
   }
 
+  getNewInputMap = () => ({...this.getInputMap()});
+
+  getAllInputKeys = () => Object.keys(this.getNewInputMap());
+
   getNewErrorMap = () => ({...this.getErrorMap()});
 
   getAllErrorKeys = () => Object.keys(this.getNewErrorMap());
 
-  dismissErrorList = (keys = []) => {
+  dismissErrorList = (keys = [], cancelItems = false) => {
     const newErrorMap = this.getNewErrorMap();
 
     this.setErrorMap(
@@ -39,11 +53,25 @@ export default class ItemQueueProcessorController {
           [k]: newErrorMap[k]
         }), {})
     );
+
+    if (!!cancelItems) {
+      const newInputMap = this.getNewInputMap();
+
+      this.setInputMap(
+        Object
+          .keys(newInputMap)
+          .filter(k => keys.indexOf(k) === -1)
+          .reduce((acc, k) => ({
+            ...acc,
+            [k]: newInputMap[k]
+          }), {})
+      );
+    }
   };
 
-  dismissError = (key) => this.dismissErrorList([key]);
+  dismissError = (key, cancelItem = false) => this.dismissErrorList([key], cancelItem);
 
-  dismissAllErrors = () => this.dismissErrorList(this.getAllErrorKeys());
+  dismissAllErrors = (cancelItems = false) => this.dismissErrorList(this.getAllErrorKeys(), cancelItems);
 
   retryErrorList = (keys = []) => {
     this.dismissErrorList(keys);

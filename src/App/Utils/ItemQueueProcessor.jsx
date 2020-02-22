@@ -191,9 +191,11 @@ export default class ItemQueueProcessor extends Component {
             errorQueue: 'ErrorQueue'
           }}
           getters={{
+            getInputMap: 'InputMap',
             getErrorMap: 'ErrorMap'
           }}
           setters={{
+            setInputMap: 'InputMap',
             setErrorMap: 'ErrorMap'
           }}
           invalidators={{
