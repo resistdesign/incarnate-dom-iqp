@@ -41,14 +41,27 @@ export default class ItemQueueProcessor extends Component {
           factory={() => new Queue()}
         />
         <LifePod
+          name='QueueIsValid'
+          factory={() => true}
+        />
+        <LifePod
           name='QueueUpdater'
           dependencies={{
             queue: 'Queue',
             errorQueue: 'ErrorQueue',
             inputMap: 'InputMap'
           }}
-          factory={({queue, errorQueue, inputMap = {}}) => {
-            queue.addKeys(errorQueue.getUnregisteredKeys(Object.keys(inputMap)));
+          invalidators={{
+            invalidateQueueIsValid: 'QueueIsValid'
+          }}
+          factory={({queue, errorQueue, inputMap = {}, invalidateQueueIsValid}) => {
+            const keysToQueue = errorQueue.getUnregisteredKeys(Object.keys(inputMap));
+
+            if (keysToQueue.length > 0) {
+              queue.addKeys(keysToQueue);
+
+              invalidateQueueIsValid();
+            }
 
             return true;
           }}
@@ -64,7 +77,9 @@ export default class ItemQueueProcessor extends Component {
             queue: 'Queue',
             errorQueue: 'ErrorQueue',
             // TRICKY: Watched but unused.
-            inputMap: 'InputMap'
+            inputMap: 'InputMap',
+            // TRICKY: A trigger used to restart processing.
+            queueIsValid: 'QueueIsValid'
           }}
           getters={{
             getInputMap: 'InputMap',
@@ -174,6 +189,12 @@ export default class ItemQueueProcessor extends Component {
           name='Controller'
           dependencies={{
             errorQueue: 'ErrorQueue'
+          }}
+          getters={{
+            getErrorMap: 'ErrorMap'
+          }}
+          setters={{
+            setErrorMap: 'ErrorMap'
           }}
           invalidators={{
             invalidateQueueUpdater: 'QueueUpdater'

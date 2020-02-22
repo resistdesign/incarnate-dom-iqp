@@ -209,20 +209,33 @@ export class App extends Component {
             <DisplayBox>
               <LifePod
                 dependencies={{
-                  errorMap: 'ErrorMap'
+                  errorMap: 'ErrorMap',
+                  mapQueueProcessorController: 'MapQueueProcessor.Controller'
                 }}
-                mapToProps={({errorMap = {}}) => ({
-                  errorMessages: Object.keys(errorMap).map(k => `${k}: ${errorMap[k].message}`)
-                })}
+                mapToProps={p => p}
               >
-                {({errorMessages}) => (
-                  <div>
-                    <h5>{errorMessages.length} Errors</h5>
-                    <ul>
-                      {errorMessages.map((m, i) => (<li key={`Message:${i}`}>{m}</li>))}
-                    </ul>
-                  </div>
-                )}
+                {({errorMap = {}, mapQueueProcessorController}) => {
+                  const errorKeyList = Object.keys(errorMap);
+
+                  return (
+                    <div>
+                      <h5>{errorKeyList.length} Errors</h5>
+                      <ul>
+                        {errorKeyList.map(k => (
+                          <li key={`Message:${k}`}>
+                            {k}:&nbsp;{errorMap[k] && errorMap[k].message}
+                            &nbsp;
+                            <button
+                              onClick={() => mapQueueProcessorController.dismissError(k)}
+                            >
+                              Dismiss
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                }}
               </LifePod>
             </DisplayBox>
           </Row>
