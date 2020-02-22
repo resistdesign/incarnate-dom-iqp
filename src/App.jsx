@@ -71,6 +71,8 @@ const DisplayButton = styled(DisplayBox)`
   }
 `;
 
+const PROCESSING_COUNT_MAP = {};
+
 export class App extends Component {
   static propTypes = {};
 
@@ -92,14 +94,21 @@ export class App extends Component {
             }}
             strict
             factory={({parentItemID}) => async ({id, ...item} = {}) => await new Promise((res, rej) => setTimeout(
-              () => Math.random() < 0.3 ?
-                rej(new Error('Unknown Error')) :
-                res({
-                  id: `SAVED_${id}`,
-                  parentItemID,
-                  ...item
-                }),
-              1500
+              () => {
+                PROCESSING_COUNT_MAP[id] = typeof PROCESSING_COUNT_MAP[id] === 'number' ?
+                  PROCESSING_COUNT_MAP[id] + 1 :
+                  1;
+
+                return Math.random() < 0.25 ?
+                  rej(new Error('Unknown Error')) :
+                  res({
+                    id: `SAVED_${id}`,
+                    processedXTimes: PROCESSING_COUNT_MAP[id],
+                    parentItemID,
+                    ...item
+                  });
+              },
+              2500
             ))}
           />
           <LifePod
@@ -154,6 +163,11 @@ export class App extends Component {
                   setRunningCount(getRunningCount() + 1);
 
                   setMap(item, id);
+
+                  if (Math.random() < 0.4) {
+                    // Make it stale. (Mmmmmmmm, it's like late night fries!)
+                    setTimeout(() => setMap({...item, note: 'Updated mid-processing'}, id), Math.random() * 2000);
+                  }
                 }
               })}
             >
