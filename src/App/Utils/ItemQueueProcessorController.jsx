@@ -23,35 +23,36 @@ export default class ItemQueueProcessorController {
     Object.assign(this, config);
   }
 
-  dismissError = (key) => {
-    const newErrorMap = {
-      ...this.getErrorMap()
-    };
+  getNewErrorMap = () => ({...this.getErrorMap()});
 
-    this.errorQueue.removeKeys([key]);
+  getAllErrorKeys = () => Object.keys(this.getNewErrorMap());
 
-    delete newErrorMap[key];
-
-    this.setErrorMap(newErrorMap);
-    this.invalidateQueueUpdater();
-  };
-
-  dismissAllErrors = (keys = []) => {
-    const errorMap = {
-      ...this.getErrorMap()
-    };
-
-    this.errorQueue.removeKeys(keys);
+  dismissErrorList = (keys = []) => {
+    const newErrorMap = this.getNewErrorMap();
 
     this.setErrorMap(
       Object
-        .keys(errorMap)
+        .keys(newErrorMap)
         .filter(k => keys.indexOf(k) === -1)
         .reduce((acc, k) => ({
           ...acc,
-          [k]: errorMap[k]
+          [k]: newErrorMap[k]
         }), {})
     );
+  };
+
+  dismissError = (key) => this.dismissErrorList([key]);
+
+  dismissAllErrors = () => this.dismissErrorList(this.getAllErrorKeys());
+
+  retryErrorList = (keys = []) => {
+    this.dismissErrorList(keys);
+
+    this.errorQueue.removeKeys(keys);
     this.invalidateQueueUpdater();
   };
+
+  retryError = (key) => this.retryErrorList([key]);
+
+  retryAllErrors = () => this.retryErrorList(this.getAllErrorKeys());
 }
