@@ -1,6 +1,11 @@
 export default class Queue {
   queue = {};
 
+  getMapWithoutQueued = (map = {}) => Object
+    .keys(map)
+    .filter(k => this.queue[k] === true)
+    .reduce((acc, k) => ({...acc, [k]: map[k]}), {});
+
   isProcessing = () => Object
     .keys(this.queue)
     .filter(k => this.queue[k] === true).length > 0;
