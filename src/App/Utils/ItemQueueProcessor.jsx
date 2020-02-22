@@ -5,6 +5,8 @@ import Queue from './Queue';
 import ItemQueueProcessorController from './ItemQueueProcessorController';
 
 export default class ItemQueueProcessor extends Component {
+  static DEFAULT_PRIMARY_KEY = 'id';
+
   static propTypes = {
     ...Incarnate.propTypes,
     shared: T.shape({
@@ -14,13 +16,15 @@ export default class ItemQueueProcessor extends Component {
       ItemProcessor: T.string
     }),
     batchSize: T.number,
-    batchDelayMS: T.number
+    batchDelayMS: T.number,
+    primaryKey: T.string
   };
 
   render() {
     const {
       batchSize = 5,
       batchDelayMS = 0,
+      primaryKey = ItemQueueProcessor.DEFAULT_PRIMARY_KEY,
       ...props
     } = this.props;
 
@@ -43,15 +47,8 @@ export default class ItemQueueProcessor extends Component {
             errorQueue: 'ErrorQueue',
             inputMap: 'InputMap'
           }}
-          getters={{
-            getInputMap: 'InputMap'
-          }}
-          factory={({queue, errorQueue, inputMap = {}, getInputMap}) => {
-            const inputResolverMap = Object
-              .keys(inputMap)
-              .reduce((acc, k) => ({...acc, [k]: () => getInputMap(k)}), {});
-
-            queue.addKeys(errorQueue.getMapWithoutQueued(inputResolverMap));
+          factory={({queue, errorQueue, inputMap = {}}) => {
+            queue.addKeys(errorQueue.getUnregisteredKeys(Object.keys(inputMap)));
 
             return true;
           }}
@@ -95,52 +92,50 @@ export default class ItemQueueProcessor extends Component {
                           }) => {
             await new Promise(res => setTimeout(res, batchDelayMS));
 
-            const itemResolverMap = queue.getNValues(batchSize);
-            const itemIdList = Object.keys(itemResolverMap);
+            const itemKeyList = queue.getNKeys(batchSize);
+            const itemResolverMap = itemKeyList.reduce((acc, k) => ({...acc, [k]: () => getInputMap(k)}), {});
 
-            if (itemIdList.length > 0) {
+            if (itemKeyList.length > 0) {
               const process = async () => {
-                const removedIds = [];
+                const successfullyProcessedKeys = [];
                 const newOutputMap = {};
                 const promises = [];
-                const staleItemIds = [];
+                const staleItemKeys = [];
 
                 setProcessing(true);
-                for (let i = 0; i < itemIdList.length; i++) {
-                  const id = itemIdList[i];
-                  const itemRes = itemResolverMap[id];
+                for (let i = 0; i < itemKeyList.length; i++) {
+                  const currentKey = itemKeyList[i];
+                  const itemRes = itemResolverMap[currentKey];
 
                   promises.push(new Promise(
                     async res => {
                       try {
-                        const item = itemRes();
+                        const item = await itemRes();
                         const returnItem = await itemProcessor(item);
-                        const itemIsStale = item !== itemRes();
+                        const itemIsStale = item !== await itemRes();
                         const {
-                          id: newId
+                          [primaryKey]: newKey
                         } = returnItem;
 
                         if (!!itemIsStale) {
                           // TRICKY: IMPORTANT: The item may have changed since processing began,
                           // that means the processed item is now stale and should be queued again,
                           // NOT removed from the `InputMap`.
-                          staleItemIds.push(id);
+                          staleItemKeys.push(currentKey);
                         }
 
-                        newOutputMap[newId] = returnItem;
-                        removedIds.push(id);
+                        newOutputMap[newKey] = returnItem;
+                        successfullyProcessedKeys.push(currentKey);
                       } catch (error) {
                         // Set errors.
                         const errorMap = getErrorMap() || {};
 
                         setErrorMap({
                           ...errorMap,
-                          [id]: error
+                          [currentKey]: error
                         });
 
-                        errorQueue.addKeys({
-                          [id]: true
-                        });
+                        errorQueue.addKeys([currentKey]);
                       }
 
                       res();
@@ -155,13 +150,13 @@ export default class ItemQueueProcessor extends Component {
                   ...getInputMap()
                 };
 
-                removedIds.forEach(id => {
+                successfullyProcessedKeys.forEach(spk => {
                   // IMPORTANT: Do not remove items that have changed from the `InputMap`;
-                  if (staleItemIds.indexOf(id) === -1) {
-                    delete newInputMap[id];
+                  if (staleItemKeys.indexOf(spk) === -1) {
+                    delete newInputMap[spk];
                   }
                 });
-                queue.removeKeys(itemResolverMap);
+                queue.removeKeys(itemKeyList);
                 setOutputMap({
                   ...getOutputMap(),
                   ...newOutputMap

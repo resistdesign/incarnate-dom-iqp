@@ -13,14 +13,14 @@ export default class ItemQueueProcessorController {
     Object.assign(this, config);
   }
 
-  dismissError = (id) => {
-    this.errorQueue.removeKeys({[id]: true});
+  dismissError = (key) => {
+    this.errorQueue.removeKeys([key]);
 
     this.invalidateQueueUpdater();
   };
 
-  dismissAllErrors = (map = {}) => {
-    this.errorQueue.removeKeys(map);
+  dismissAllErrors = (keys = []) => {
+    this.errorQueue.removeKeys(keys);
 
     this.invalidateQueueUpdater();
   };

@@ -1,51 +1,45 @@
 export default class Queue {
+  static STATUS = {
+    QUEUED: 'QUEUED',
+    PROCESSING: 'PROCESSING'
+  };
+
   queue = {};
 
-  getMapWithoutQueued = (map = {}) => Object
-    .keys(map)
-    .filter(k => this.queue[k] === true)
-    .reduce((acc, k) => ({...acc, [k]: map[k]}), {});
+  getUnregisteredKeys = (keys = []) => keys.filter(k => !this.queue[k]);
 
   isProcessing = () => Object
     .keys(this.queue)
-    .filter(k => this.queue[k] === true).length > 0;
+    .filter(k => this.queue[k] === Queue.STATUS.PROCESSING).length > 0;
 
-  addKeys = (map = {}) => Object
-    .keys(map)
+  addKeys = (keys = []) => keys
     .forEach(k => {
-      if (this.queue[k] !== true) {
-        this.queue[k] = map[k];
+      if (this.queue[k] !== Queue.STATUS.PROCESSING) {
+        this.queue[k] = Queue.STATUS.QUEUED;
       }
     });
 
-  checkoutKeys = (map = {}) => Object
-    .keys(map)
-    .forEach(k => this.queue[k] = true);
+  checkoutKeys = (keys = []) => keys
+    .forEach(k => this.queue[k] = Queue.STATUS.PROCESSING);
 
-  getNValues = (n = 0) => {
-    const valueMap = {};
+  getNKeys = (n = 0) => {
+    const keys = [];
 
     if (!this.isProcessing()) {
       const queueKeyList = Object.keys(this.queue);
-      const valueKeyList = [];
 
-      for (let i = 0; valueKeyList.length < n && i < queueKeyList.length; i++) {
-        const key = queueKeyList[i];
-        const value = this.queue[key];
+      for (let i = 0; keys.length < n && i < queueKeyList.length; i++) {
+        const k = queueKeyList[i];
 
-        if (value !== true) {
-          valueKeyList.push(key);
-          valueMap[key] = value;
-        }
+        keys.push(k);
       }
 
-      this.checkoutKeys(valueMap);
+      this.checkoutKeys(keys);
     }
 
-    return valueMap;
+    return keys;
   };
 
-  removeKeys = (map = {}) => Object
-    .keys(map)
+  removeKeys = (keys = []) => keys
     .forEach(k => delete this.queue[k]);
 }

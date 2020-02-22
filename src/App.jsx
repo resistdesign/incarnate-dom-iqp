@@ -111,6 +111,10 @@ export class App extends Component {
             factory={() => ({})}
           />
           <LifePod
+            name='ErrorMap'
+            factory={() => ({})}
+          />
+          <LifePod
             name='Existing'
             factory={() => ({})}
           />
@@ -119,7 +123,8 @@ export class App extends Component {
             shared={{
               InputMap: 'Map',
               OutputMap: 'Existing',
-              ItemProcessor: 'ItemProcessor'
+              ItemProcessor: 'ItemProcessor',
+              ErrorMap: 'ErrorMap'
             }}
             batchSize={3}
             batchDelayMS={1500}
@@ -196,6 +201,22 @@ export class App extends Component {
               >
                 {({existing}) => (
                   <pre>{JSON.stringify(existing, null, '  ')}</pre>
+                )}
+              </LifePod>
+            </DisplayBox>
+          </Row>
+          <Row>
+            <DisplayBox>
+              <LifePod
+                dependencies={{
+                  errorMap: 'ErrorMap'
+                }}
+                mapToProps={({errorMap = {}}) => ({
+                  numberOfErrors: Object.keys(errorMap).length
+                })}
+              >
+                {({numberOfErrors}) => (
+                  <h5>{numberOfErrors} Errors</h5>
                 )}
               </LifePod>
             </DisplayBox>
