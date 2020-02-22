@@ -212,11 +212,16 @@ export class App extends Component {
                   errorMap: 'ErrorMap'
                 }}
                 mapToProps={({errorMap = {}}) => ({
-                  numberOfErrors: Object.keys(errorMap).length
+                  errorMessages: Object.keys(errorMap).map(k => `${k}: ${errorMap[k].message}`)
                 })}
               >
-                {({numberOfErrors}) => (
-                  <h5>{numberOfErrors} Errors</h5>
+                {({errorMessages}) => (
+                  <div>
+                    <h5>{errorMessages.length} Errors</h5>
+                    <ul>
+                      {errorMessages.map((m, i) => (<li key={`Message:${i}`}>{m}</li>))}
+                    </ul>
+                  </div>
                 )}
               </LifePod>
             </DisplayBox>
