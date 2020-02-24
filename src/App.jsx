@@ -19,8 +19,13 @@ import {
   ThemeProvider
 } from '@material-ui/core/styles';
 import SRACLMUITheme from '@resistdesign/sracl-mui-theme';
+import {Light as SyntaxHighlighter} from 'react-syntax-highlighter';
+import {hybrid} from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import JSONLanguage from 'react-syntax-highlighter/dist/esm/languages/hljs/json';
 import {ItemQueueProcessor} from './index';
-import Logo from './Assets/Graphics/zap-logo.svg';
+import Logo from './App/Assets/Graphics/zap-logo.svg';
+
+SyntaxHighlighter.registerLanguage('json', JSONLanguage);
 
 const THEME = createMuiTheme(SRACLMUITheme);
 const GlobalStyle = createGlobalStyle`
@@ -62,11 +67,13 @@ const Title = styled(Typography).attrs(p => ({
 }))`
   
 `;
-const SectionGrid = styled.div`
+const Area = styled.div`
+  padding: 2em;
+`;
+const SectionGrid = styled(Area)`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-gap: 4em;
-  padding: 2em;
   box-sizing: border-box;
   
   @media (max-width: 620px) {
@@ -107,141 +114,143 @@ export class App extends Component {
 
   render() {
     return (
-      <Fragment>
-        <GlobalStyle/>
-        <ThemeProvider
-          theme={THEME}
-        >
-          <CssBaseline/>
-          <Base
-            display='flex'
-            flexDirection='column'
-            alignItems='stretch'
-            justifyContent='flex-start'
+      <Incarnate
+        name='ItemQueueProcessorDemo'
+      >
+        <Fragment>
+          <LifePod
+            name='ParentItemID'
+            factory={() => UUIDV4()}
+          />
+          <LifePod
+            name='ItemProcessor'
+            dependencies={{
+              parentItemID: 'ParentItemID'
+            }}
+            strict
+            factory={({parentItemID}) => async ({id, ...item} = {}) => await new Promise((res, rej) => setTimeout(
+              () => {
+                PROCESSING_COUNT_MAP[id] = typeof PROCESSING_COUNT_MAP[id] === 'number' ?
+                  PROCESSING_COUNT_MAP[id] + 1 :
+                  1;
+
+                return Math.random() < 0.25 ?
+                  rej(new Error('Unknown Error')) :
+                  res({
+                    id: `SAVED_${id}`,
+                    processedXTimes: PROCESSING_COUNT_MAP[id],
+                    parentItemID,
+                    ...item
+                  });
+              },
+              2500
+            ))}
+          />
+          <LifePod
+            name='RunningCount'
+            factory={() => 0}
+          />
+          <LifePod
+            name='Map'
+            factory={() => ({})}
+          />
+          <LifePod
+            name='ErrorMap'
+            factory={() => ({})}
+          />
+          <LifePod
+            name='Existing'
+            factory={() => ({})}
+          />
+          <ItemQueueProcessor
+            name='MapQueueProcessor'
+            shared={{
+              InputMap: 'Map',
+              OutputMap: 'Existing',
+              ItemProcessor: 'ItemProcessor',
+              ErrorMap: 'ErrorMap'
+            }}
+            batchSize={3}
+            batchDelayMS={1500}
+          />
+        </Fragment>
+        <Fragment>
+          <GlobalStyle/>
+          <ThemeProvider
+            theme={THEME}
           >
-            <HeaderBox
+            <CssBaseline/>
+            <Base
               display='flex'
-              flexDirection='row'
-              alignItems='center'
+              flexDirection='column'
+              alignItems='stretch'
               justifyContent='flex-start'
             >
-              <LogoImg
-                src={Logo}
-              />
-              <Title
-                variant='h5'
+              <HeaderBox
+                display='flex'
+                flexDirection='row'
+                alignItems='center'
+                justifyContent='flex-start'
               >
-                Incarnate DOM <Title display='inline' variant='h5' color='textSecondary'>Item Queue Processor</Title>
-              </Title>
-            </HeaderBox>
-            <SectionGrid>
-              <Incarnate
-                name='ItemQueueProcessorDemo'
-              >
-                <LifePod
-                  name='ParentItemID'
-                  factory={() => UUIDV4()}
+                <LogoImg
+                  src={Logo}
                 />
-                <LifePod
-                  name='ItemProcessor'
-                  dependencies={{
-                    parentItemID: 'ParentItemID'
-                  }}
-                  strict
-                  factory={({parentItemID}) => async ({id, ...item} = {}) => await new Promise((res, rej) => setTimeout(
-                    () => {
-                      PROCESSING_COUNT_MAP[id] = typeof PROCESSING_COUNT_MAP[id] === 'number' ?
-                        PROCESSING_COUNT_MAP[id] + 1 :
-                        1;
+                <Title
+                  variant='h5'
+                >
+                  Incarnate DOM <Title display='inline' variant='h5' color='textSecondary'>Item Queue Processor</Title>
+                </Title>
+              </HeaderBox>
+              <Area>
+                <Section>
+                  <SubSection>
+                    <Card>
+                      <LifePod
+                        getters={{
+                          getRunningCount: 'RunningCount'
+                        }}
+                        setters={{
+                          setRunningCount: 'RunningCount',
+                          setMap: 'Map'
+                        }}
+                        mapToProps={({
+                                       getRunningCount,
+                                       setRunningCount,
+                                       setMap
+                                     }) => ({
+                          onClick: () => {
+                            const id = UUIDV4();
+                            const item = {
+                              id,
+                              properties: {},
+                              content: `I'm an item!`
+                            };
 
-                      return Math.random() < 0.25 ?
-                        rej(new Error('Unknown Error')) :
-                        res({
-                          id: `SAVED_${id}`,
-                          processedXTimes: PROCESSING_COUNT_MAP[id],
-                          parentItemID,
-                          ...item
-                        });
-                    },
-                    2500
-                  ))}
-                />
-                <LifePod
-                  name='RunningCount'
-                  factory={() => 0}
-                />
-                <LifePod
-                  name='Map'
-                  factory={() => ({})}
-                />
-                <LifePod
-                  name='ErrorMap'
-                  factory={() => ({})}
-                />
-                <LifePod
-                  name='Existing'
-                  factory={() => ({})}
-                />
-                <ItemQueueProcessor
-                  name='MapQueueProcessor'
-                  shared={{
-                    InputMap: 'Map',
-                    OutputMap: 'Existing',
-                    ItemProcessor: 'ItemProcessor',
-                    ErrorMap: 'ErrorMap'
-                  }}
-                  batchSize={3}
-                  batchDelayMS={1500}
-                />
-                <RowBox>
-                  <Section>
-                    <SubSection>
-                      <Card>
-                        <LifePod
-                          getters={{
-                            getRunningCount: 'RunningCount'
-                          }}
-                          setters={{
-                            setRunningCount: 'RunningCount',
-                            setMap: 'Map'
-                          }}
-                          mapToProps={({
-                                         getRunningCount,
-                                         setRunningCount,
-                                         setMap
-                                       }) => ({
-                            onClick: () => {
-                              const id = UUIDV4();
-                              const item = {
-                                id,
-                                properties: {},
-                                content: `I'm an item!`
-                              };
+                            setRunningCount(getRunningCount() + 1);
 
-                              setRunningCount(getRunningCount() + 1);
+                            setMap(item, id);
 
-                              setMap(item, id);
-
-                              if (Math.random() < 0.4) {
-                                // Make it stale. (Mmmmmmmm, it's like late night fries!)
-                                setTimeout(() => setMap({
-                                  ...item,
-                                  note: 'Updated mid-processing'
-                                }, id), Math.random() * 2000);
-                              }
+                            if (Math.random() < 0.4) {
+                              // Make it stale. (Mmmmmmmm, it's like late night fries!)
+                              setTimeout(() => setMap({
+                                ...item,
+                                note: 'Updated mid-processing'
+                              }, id), Math.random() * 2000);
                             }
-                          })}
-                        >
-                          <CardActionArea>
-                            <CardHeader>
-                              Add Item
-                            </CardHeader>
-                          </CardActionArea>
-                        </LifePod>
-                      </Card>
-                    </SubSection>
-                  </Section>
-                </RowBox>
+                          }
+                        })}
+                      >
+                        <CardActionArea>
+                          <CardHeader>
+                            Add Item
+                          </CardHeader>
+                        </CardActionArea>
+                      </LifePod>
+                    </Card>
+                  </SubSection>
+                </Section>
+              </Area>
+              <SectionGrid>
                 <Section>
                   <SubSection>
                     <h3>Map</h3>
@@ -251,7 +260,12 @@ export class App extends Component {
                       }}
                     >
                       {({map}) => (
-                        <pre>{JSON.stringify(map, null, '  ')}</pre>
+                        <SyntaxHighlighter
+                          language='json'
+                          style={hybrid}
+                        >
+                          {JSON.stringify(map, null, '  ')}
+                        </SyntaxHighlighter>
                       )}
                     </LifePod>
                   </SubSection>
@@ -280,7 +294,12 @@ export class App extends Component {
                       }}
                     >
                       {({existing}) => (
-                        <pre>{JSON.stringify(existing, null, '  ')}</pre>
+                        <SyntaxHighlighter
+                          language='json'
+                          style={hybrid}
+                        >
+                          {JSON.stringify(existing, null, '  ')}
+                        </SyntaxHighlighter>
                       )}
                     </LifePod>
                   </SubSection>
@@ -331,11 +350,11 @@ export class App extends Component {
                     </LifePod>
                   </SubSection>
                 </Section>
-              </Incarnate>
-            </SectionGrid>
-          </Base>
-        </ThemeProvider>
-      </Fragment>
+              </SectionGrid>
+            </Base>
+          </ThemeProvider>
+        </Fragment>
+      </Incarnate>
     );
   }
 }
