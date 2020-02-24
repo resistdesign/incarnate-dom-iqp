@@ -229,64 +229,62 @@ export class App extends Component {
                 <Section>
                   <SubSection>
                     <Card>
-                      <LifePod
-                        getters={{
-                          getRunningCount: 'RunningCount'
-                        }}
-                        setters={{
-                          setRunningCount: 'RunningCount',
-                          setMap: 'Map'
-                        }}
-                        mapToProps={({
-                                       getRunningCount,
-                                       setRunningCount,
-                                       setMap
-                                     }) => ({
-                          onClick: () => {
-                            const id = UUIDV4();
-                            const item = {
-                              id,
-                              properties: {},
-                              content: `I'm an item!`
-                            };
-
-                            setRunningCount(getRunningCount() + 1);
-
-                            setMap(item, id);
-
-                            if (Math.random() < 0.4) {
-                              // Make it stale. (Mmmmmmmm, it's like late night fries!)
-                              setTimeout(() => setMap({
-                                ...item,
-                                note: 'Updated mid-processing'
-                              }, id), Math.random() * 2000);
-                            }
-                          }
-                        })}
+                      <CardMedia
+                        title='Add Item'
+                        image='https://resist.design/Console%20BG%202.jpg'
                       >
-                        <CardActionArea>
-                          <CardMedia
-                            title='Add Item'
-                            image='https://resist.design/Console%20BG%202.jpg'
+                        <Box
+                          width='100%'
+                          height='15em'
+                          display='flex'
+                          alignItems='center'
+                          justifyContent='center'
+                        >
+                          <LifePod
+                            getters={{
+                              getRunningCount: 'RunningCount'
+                            }}
+                            setters={{
+                              setRunningCount: 'RunningCount',
+                              setMap: 'Map'
+                            }}
+                            mapToProps={({
+                                           getRunningCount,
+                                           setRunningCount,
+                                           setMap
+                                         }) => ({
+                              onClick: () => {
+                                const id = UUIDV4();
+                                const item = {
+                                  id,
+                                  properties: {},
+                                  content: `I'm an item!`
+                                };
+
+                                setRunningCount(getRunningCount() + 1);
+
+                                setMap(item, id);
+
+                                if (Math.random() < 0.4) {
+                                  // Make it stale. (Mmmmmmmm, it's like late night fries!)
+                                  setTimeout(() => setMap({
+                                    ...item,
+                                    note: 'Updated mid-processing'
+                                  }, id), Math.random() * 2000);
+                                }
+                              }
+                            })}
                           >
-                            <Box
-                              width='100%'
-                              height='15em'
-                              display='flex'
-                              alignItems='center'
-                              justifyContent='center'
+                            <Button
+                              variant='contained'
+                              color='primary'
+                              size='large'
                             >
-                              <Button
-                                variant='contained'
-                                color='primary'
-                                size='large'
-                              >
-                                Add Item
-                              </Button>
-                            </Box>
-                          </CardMedia>
-                        </CardActionArea>
-                      </LifePod>
+                              Add Item
+                            </Button>
+                          </LifePod>
+                        </Box>
+                      </CardMedia>
                       <CardHeader
                         title='Map'
                       />
@@ -315,7 +313,14 @@ export class App extends Component {
                 </Section>
                 <Section>
                   <SubSection>
-                    <Card>
+                    <Card
+                      style={{
+                        flex: '0 0 auto',
+                        width: '15em',
+                        height: '15em',
+                        margin: 'auto'
+                      }}
+                    >
                       <CardHeader
                         title='Processing Queue'
                       />
@@ -329,7 +334,13 @@ export class App extends Component {
                           <LinearProgress
                             color='secondary'
                           />
-                        ) : undefined}
+                        ) : (
+                          <LinearProgress
+                            variant='determinate'
+                            color='secondary'
+                            value={0}
+                          />
+                        )}
                       </LifePod>
                       <LifePod
                         dependencies={{
@@ -340,11 +351,6 @@ export class App extends Component {
                         {({runningCount, existing = {}}) => (
                           <Fragment>
                             <CardContent>
-                              <Typography
-                                variant='h6'
-                              >
-                                Created:
-                              </Typography>
                               <Box
                                 width='100%'
                                 display='flex'
@@ -353,8 +359,8 @@ export class App extends Component {
                                 justifyContent='center'
                               >
                                 <Typography
-                                  variant='h1'
-                                  color='primary'
+                                  variant='h2'
+                                  color='secondary'
                                 >
                                   {Object.keys(existing).length}/{runningCount}
                                 </Typography>
@@ -413,41 +419,46 @@ export class App extends Component {
                           <Card>
                             <CardHeader
                               title={`${errorKeyList.length} Error${errorKeyList.length === 1 ? '' : 's'}`}
+                              style={{
+                                opacity: errorKeyList.length > 0 ? 1 : 0.5
+                              }}
                             />
-                            <List>
-                              {errorKeyList.map(k => (
-                                <ListItem
-                                  key={`Message:${k}`}
-                                >
-                                  <ListItemText
-                                    primary={k}
-                                    secondary={errorMap[k] && errorMap[k].message}
-                                  />
-                                  <ListItemSecondaryAction>
-                                    <ButtonGroup
-                                      variant='outlined'
-                                      color='secondary'
-                                    >
-                                      <Button
-                                        onClick={() => mapQueueProcessorController.retryError(k)}
+                            {errorKeyList.length > 0 ? (
+                              <List>
+                                {errorKeyList.map(k => (
+                                  <ListItem
+                                    key={`Message:${k}`}
+                                  >
+                                    <ListItemText
+                                      primary={k}
+                                      secondary={errorMap[k] && errorMap[k].message}
+                                    />
+                                    <ListItemSecondaryAction>
+                                      <ButtonGroup
+                                        variant='outlined'
+                                        color='secondary'
                                       >
-                                        Retry
-                                      </Button>
-                                      <Button
-                                        onClick={() => mapQueueProcessorController.dismissError(k)}
-                                      >
-                                        Dismiss
-                                      </Button>
-                                      <Button
-                                        onClick={() => mapQueueProcessorController.dismissError(k, true)}
-                                      >
-                                        Cancel
-                                      </Button>
-                                    </ButtonGroup>
-                                  </ListItemSecondaryAction>
-                                </ListItem>
-                              ))}
-                            </List>
+                                        <Button
+                                          onClick={() => mapQueueProcessorController.retryError(k)}
+                                        >
+                                          Retry
+                                        </Button>
+                                        <Button
+                                          onClick={() => mapQueueProcessorController.dismissError(k)}
+                                        >
+                                          Dismiss
+                                        </Button>
+                                        <Button
+                                          onClick={() => mapQueueProcessorController.dismissError(k, true)}
+                                        >
+                                          Cancel
+                                        </Button>
+                                      </ButtonGroup>
+                                    </ListItemSecondaryAction>
+                                  </ListItem>
+                                ))}
+                              </List>
+                            ) : undefined}
                           </Card>
                         );
                       }}
