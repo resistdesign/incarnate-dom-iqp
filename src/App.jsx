@@ -30,7 +30,7 @@ import {Light as SyntaxHighlighter} from 'react-syntax-highlighter';
 import {hybrid} from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import JSONLanguage from 'react-syntax-highlighter/dist/esm/languages/hljs/json';
 import {ItemQueueProcessor} from './index';
-import Logo from './App/Assets/Graphics/zap-logo.svg';
+import Logo from './App/Assets/Graphics/Incarnate Logo Icon 2020.svg';
 
 SyntaxHighlighter.registerLanguage('json', JSONLanguage);
 
