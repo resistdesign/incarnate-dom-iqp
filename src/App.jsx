@@ -5,6 +5,9 @@ import styled, {createGlobalStyle} from 'styled-components';
 import Incarnate, {LifePod} from 'incarnate-dom';
 import UUIDV4 from 'uuid/v4';
 import {
+  Box,
+  Button,
+  ButtonGroup,
   Card,
   CardHeader,
   CardContent,
@@ -12,7 +15,11 @@ import {
   CardMedia,
   CardActionArea,
   CssBaseline,
-  Typography, Box
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction
 } from '@material-ui/core';
 import {
   createMuiTheme,
@@ -241,9 +248,12 @@ export class App extends Component {
                         })}
                       >
                         <CardActionArea>
-                          <CardHeader>
-                            Add Item
-                          </CardHeader>
+                          <CardHeader
+                            title='Add Item'
+                            style={{
+                              alignItems: 'center'
+                            }}
+                          />
                         </CardActionArea>
                       </LifePod>
                     </Card>
@@ -253,57 +263,83 @@ export class App extends Component {
               <SectionGrid>
                 <Section>
                   <SubSection>
-                    <h3>Map</h3>
-                    <LifePod
-                      dependencies={{
-                        map: 'Map'
-                      }}
-                    >
-                      {({map}) => (
-                        <SyntaxHighlighter
-                          language='json'
-                          style={hybrid}
+                    <Card>
+                      <CardHeader
+                        title='Map'
+                      />
+                      <CardContent>
+                        <LifePod
+                          dependencies={{
+                            map: 'Map'
+                          }}
                         >
-                          {JSON.stringify(map, null, '  ')}
-                        </SyntaxHighlighter>
-                      )}
-                    </LifePod>
-                  </SubSection>
-                  <SubSection>
-                    <h3>Processing Queue</h3>
-                    <LifePod
-                      dependencies={{
-                        runningCount: 'RunningCount',
-                        processingRequests: 'MapQueueProcessor.Processing',
-                        existing: 'Existing'
-                      }}
-                    >
-                      {({runningCount, processingRequests, existing = {}}) => (
-                        <span>
-                    {!!processingRequests ? 'Yes' : 'No'}<br/>
-                    Created: {Object.keys(existing).length} out of {runningCount}
-                  </span>
-                      )}
-                    </LifePod>
-                  </SubSection>
-                  <SubSection>
-                    <h3>Existing</h3>
-                    <LifePod
-                      dependencies={{
-                        existing: 'Existing'
-                      }}
-                    >
-                      {({existing}) => (
-                        <SyntaxHighlighter
-                          language='json'
-                          style={hybrid}
-                        >
-                          {JSON.stringify(existing, null, '  ')}
-                        </SyntaxHighlighter>
-                      )}
-                    </LifePod>
+                          {({map}) => (
+                            <SyntaxHighlighter
+                              language='json'
+                              style={hybrid}
+                            >
+                              {JSON.stringify(map, null, '  ')}
+                            </SyntaxHighlighter>
+                          )}
+                        </LifePod>
+                      </CardContent>
+                    </Card>
                   </SubSection>
                 </Section>
+                <Section>
+                  <SubSection>
+                    <Card>
+                      <CardHeader
+                        title='Processing Queue'
+                      />
+                      <LifePod
+                        dependencies={{
+                          runningCount: 'RunningCount',
+                          processingRequests: 'MapQueueProcessor.Processing',
+                          existing: 'Existing'
+                        }}
+                      >
+                        {({runningCount, processingRequests, existing = {}}) => (
+                          <Fragment>
+                            <CardContent>
+                              {!!processingRequests ? 'Yes' : 'No'}
+                            </CardContent>
+                            <CardContent>
+                              Created: {Object.keys(existing).length} out of {runningCount}
+                            </CardContent>
+                          </Fragment>
+                        )}
+                      </LifePod>
+                    </Card>
+                  </SubSection>
+                </Section>
+                <Section>
+                  <SubSection>
+                    <Card>
+                      <CardHeader
+                        title='Existing'
+                      />
+                      <CardContent>
+                        <LifePod
+                          dependencies={{
+                            existing: 'Existing'
+                          }}
+                        >
+                          {({existing}) => (
+                            <SyntaxHighlighter
+                              language='json'
+                              style={hybrid}
+                            >
+                              {JSON.stringify(existing, null, '  ')}
+                            </SyntaxHighlighter>
+                          )}
+                        </LifePod>
+                      </CardContent>
+                    </Card>
+                  </SubSection>
+                </Section>
+              </SectionGrid>
+              <Area>
                 <Section>
                   <SubSection>
                     <LifePod
@@ -317,40 +353,51 @@ export class App extends Component {
                         const errorKeyList = Object.keys(errorMap);
 
                         return (
-                          <div>
-                            <h5>{errorKeyList.length} Errors</h5>
-                            <ul>
+                          <Card>
+                            <CardHeader
+                              title={`${errorKeyList.length} Error${errorKeyList.length === 1 ? '' : 's'}`}
+                            />
+                            <List>
                               {errorKeyList.map(k => (
-                                <li key={`Message:${k}`}>
-                                  {k}:&nbsp;{errorMap[k] && errorMap[k].message}
-                                  &nbsp;
-                                  <button
-                                    onClick={() => mapQueueProcessorController.dismissError(k)}
-                                  >
-                                    Dismiss
-                                  </button>
-                                  &nbsp;
-                                  <button
-                                    onClick={() => mapQueueProcessorController.retryError(k)}
-                                  >
-                                    Retry
-                                  </button>
-                                  &nbsp;
-                                  <button
-                                    onClick={() => mapQueueProcessorController.dismissError(k, true)}
-                                  >
-                                    Cancel
-                                  </button>
-                                </li>
+                                <ListItem
+                                  key={`Message:${k}`}
+                                >
+                                  <ListItemText
+                                    primary={k}
+                                    secondary={errorMap[k] && errorMap[k].message}
+                                  />
+                                  <ListItemSecondaryAction>
+                                    <ButtonGroup
+                                      variant='outlined'
+                                      color='secondary'
+                                    >
+                                      <Button
+                                        onClick={() => mapQueueProcessorController.retryError(k)}
+                                      >
+                                        Retry
+                                      </Button>
+                                      <Button
+                                        onClick={() => mapQueueProcessorController.dismissError(k)}
+                                      >
+                                        Dismiss
+                                      </Button>
+                                      <Button
+                                        onClick={() => mapQueueProcessorController.dismissError(k, true)}
+                                      >
+                                        Cancel
+                                      </Button>
+                                    </ButtonGroup>
+                                  </ListItemSecondaryAction>
+                                </ListItem>
                               ))}
-                            </ul>
-                          </div>
+                            </List>
+                          </Card>
                         );
                       }}
                     </LifePod>
                   </SubSection>
                 </Section>
-              </SectionGrid>
+              </Area>
             </Base>
           </ThemeProvider>
         </Fragment>
