@@ -1,7 +1,7 @@
 {
   "name": "incarnate-dom-iqp",
   "version": "1.0.0",
-  "description": "",
+  "description": "## Installation",
   "main": "src/index.jsx",
   "files": [
     "src/index.jsx",
@@ -10,8 +10,8 @@
   "scripts": {
     "site": "rdx compile -o docs && cp CNAME ./docs/CNAME"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Resist Design",
+  "license": "MIT",
   "dependencies": {
     "incarnate-dom": "^4.0.0",
     "prop-types": "^15.7.2",
@@ -25,5 +25,23 @@
     "react-syntax-highlighter": "^12.2.1",
     "styled-components": "^5.0.0",
     "uuid": "^3.4.0"
-  }
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/resistdesign/incarnate-dom-iqp.git"
+  },
+  "keywords": [
+    "Incarnate",
+    "DOM",
+    "Item",
+    "Queue",
+    "Processor"
+  ],
+  "bugs": {
+    "url": "https://github.com/resistdesign/incarnate-dom-iqp/issues"
+  },
+  "homepage": "https://github.com/resistdesign/incarnate-dom-iqp#readme"
 }
