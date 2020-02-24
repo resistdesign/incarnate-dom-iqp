@@ -19,7 +19,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction
+  ListItemSecondaryAction, LinearProgress
 } from '@material-ui/core';
 import {
   createMuiTheme,
@@ -88,7 +88,16 @@ const SectionGrid = styled(Area)`
   }
 `;
 const SubSectionBox = styled.div`
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
   padding: 1em;
+  
+  & > * {
+    flex: 10 auto;
+  }
 `;
 const RowBox = styled(SubSectionBox)`
   display: grid;
@@ -97,8 +106,16 @@ const RowBox = styled(SubSectionBox)`
   justify-content: flex-start;
   grid-gap: 1em;
 `;
+const CodeBox = styled.div`
+  max-height: 15em;
+  overflow: auto;
+`;
 const Section = ({title = '', children, ...props} = {}) => (
   <Box
+    display='flex'
+    flexDirection='column'
+    alignItems='stretch'
+    justifyContent='stretch'
     {...props}
   >
     {!!title ? (<Typography variant='h6'>{title}</Typography>) : undefined}
@@ -208,7 +225,7 @@ export class App extends Component {
                   Incarnate DOM <Title display='inline' variant='h5' color='textSecondary'>Item Queue Processor</Title>
                 </Title>
               </HeaderBox>
-              <Area>
+              <SectionGrid>
                 <Section>
                   <SubSection>
                     <Card>
@@ -248,22 +265,28 @@ export class App extends Component {
                         })}
                       >
                         <CardActionArea>
-                          <CardHeader
+                          <CardMedia
                             title='Add Item'
-                            style={{
-                              alignItems: 'center'
-                            }}
-                          />
+                            image='https://resist.design/Console%20BG%202.jpg'
+                          >
+                            <Box
+                              width='100%'
+                              height='15em'
+                              display='flex'
+                              alignItems='center'
+                              justifyContent='center'
+                            >
+                              <Button
+                                variant='contained'
+                                color='primary'
+                                size='large'
+                              >
+                                Add Item
+                              </Button>
+                            </Box>
+                          </CardMedia>
                         </CardActionArea>
                       </LifePod>
-                    </Card>
-                  </SubSection>
-                </Section>
-              </Area>
-              <SectionGrid>
-                <Section>
-                  <SubSection>
-                    <Card>
                       <CardHeader
                         title='Map'
                       />
@@ -274,12 +297,16 @@ export class App extends Component {
                           }}
                         >
                           {({map}) => (
-                            <SyntaxHighlighter
-                              language='json'
-                              style={hybrid}
-                            >
-                              {JSON.stringify(map, null, '  ')}
-                            </SyntaxHighlighter>
+                            <CodeBox>
+                              <SyntaxHighlighter
+                                language='json'
+                                style={hybrid}
+                                showLineNumbers
+                                wrapLines
+                              >
+                                {JSON.stringify(map, null, '  ')}
+                              </SyntaxHighlighter>
+                            </CodeBox>
                           )}
                         </LifePod>
                       </CardContent>
@@ -294,18 +321,44 @@ export class App extends Component {
                       />
                       <LifePod
                         dependencies={{
-                          runningCount: 'RunningCount',
                           processingRequests: 'MapQueueProcessor.Processing',
+                        }}
+                        mapToProps={p => p}
+                      >
+                        {({processingRequests = false} = {}) => processingRequests ? (
+                          <LinearProgress
+                            color='secondary'
+                          />
+                        ) : undefined}
+                      </LifePod>
+                      <LifePod
+                        dependencies={{
+                          runningCount: 'RunningCount',
                           existing: 'Existing'
                         }}
                       >
-                        {({runningCount, processingRequests, existing = {}}) => (
+                        {({runningCount, existing = {}}) => (
                           <Fragment>
                             <CardContent>
-                              {!!processingRequests ? 'Yes' : 'No'}
-                            </CardContent>
-                            <CardContent>
-                              Created: {Object.keys(existing).length} out of {runningCount}
+                              <Typography
+                                variant='h6'
+                              >
+                                Created:
+                              </Typography>
+                              <Box
+                                width='100%'
+                                display='flex'
+                                flexDirection='column'
+                                alignItems='center'
+                                justifyContent='center'
+                              >
+                                <Typography
+                                  variant='h1'
+                                  color='primary'
+                                >
+                                  {Object.keys(existing).length}/{runningCount}
+                                </Typography>
+                              </Box>
                             </CardContent>
                           </Fragment>
                         )}
@@ -326,12 +379,16 @@ export class App extends Component {
                           }}
                         >
                           {({existing}) => (
-                            <SyntaxHighlighter
-                              language='json'
-                              style={hybrid}
-                            >
-                              {JSON.stringify(existing, null, '  ')}
-                            </SyntaxHighlighter>
+                            <CodeBox>
+                              <SyntaxHighlighter
+                                language='json'
+                                style={hybrid}
+                                showLineNumbers
+                                wrapLines
+                              >
+                                {JSON.stringify(existing, null, '  ')}
+                              </SyntaxHighlighter>
+                            </CodeBox>
                           )}
                         </LifePod>
                       </CardContent>
