@@ -7,6 +7,9 @@
     "src/index.jsx",
     "src/ItemQueueProcessor/"
   ],
+  "scripts": {
+    "site": "rdx compile -o docs && cp CNAME ./docs/CNAME"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
