@@ -12,7 +12,7 @@ import {
   CardMedia,
   CardActionArea,
   CssBaseline,
-  Typography
+  Typography, Box
 } from '@material-ui/core';
 import {
   createMuiTheme,
@@ -136,7 +136,7 @@ export class App extends Component {
             </HeaderBox>
             <SectionGrid>
               <Incarnate
-                name='TransformPairs'
+                name='ItemQueueProcessorDemo'
               >
                 <LifePod
                   name='ParentItemID'
@@ -193,46 +193,57 @@ export class App extends Component {
                   batchSize={3}
                   batchDelayMS={1500}
                 />
-                <Row>
-                  <LifePod
-                    getters={{
-                      getRunningCount: 'RunningCount'
-                    }}
-                    setters={{
-                      setRunningCount: 'RunningCount',
-                      setMap: 'Map'
-                    }}
-                    mapToProps={({
-                                   getRunningCount,
-                                   setRunningCount,
-                                   setMap
-                                 }) => ({
-                      onClick: () => {
-                        const id = UUIDV4();
-                        const item = {
-                          id,
-                          properties: {},
-                          content: `I'm an item!`
-                        };
+                <RowBox>
+                  <Section>
+                    <SubSection>
+                      <Card>
+                        <LifePod
+                          getters={{
+                            getRunningCount: 'RunningCount'
+                          }}
+                          setters={{
+                            setRunningCount: 'RunningCount',
+                            setMap: 'Map'
+                          }}
+                          mapToProps={({
+                                         getRunningCount,
+                                         setRunningCount,
+                                         setMap
+                                       }) => ({
+                            onClick: () => {
+                              const id = UUIDV4();
+                              const item = {
+                                id,
+                                properties: {},
+                                content: `I'm an item!`
+                              };
 
-                        setRunningCount(getRunningCount() + 1);
+                              setRunningCount(getRunningCount() + 1);
 
-                        setMap(item, id);
+                              setMap(item, id);
 
-                        if (Math.random() < 0.4) {
-                          // Make it stale. (Mmmmmmmm, it's like late night fries!)
-                          setTimeout(() => setMap({...item, note: 'Updated mid-processing'}, id), Math.random() * 2000);
-                        }
-                      }
-                    })}
-                  >
-                    <DisplayButton>
-                      <h3>Add Item</h3>
-                    </DisplayButton>
-                  </LifePod>
-                </Row>
-                <Row>
-                  <DisplayBox>
+                              if (Math.random() < 0.4) {
+                                // Make it stale. (Mmmmmmmm, it's like late night fries!)
+                                setTimeout(() => setMap({
+                                  ...item,
+                                  note: 'Updated mid-processing'
+                                }, id), Math.random() * 2000);
+                              }
+                            }
+                          })}
+                        >
+                          <CardActionArea>
+                            <CardHeader>
+                              Add Item
+                            </CardHeader>
+                          </CardActionArea>
+                        </LifePod>
+                      </Card>
+                    </SubSection>
+                  </Section>
+                </RowBox>
+                <Section>
+                  <SubSection>
                     <h3>Map</h3>
                     <LifePod
                       dependencies={{
@@ -243,8 +254,8 @@ export class App extends Component {
                         <pre>{JSON.stringify(map, null, '  ')}</pre>
                       )}
                     </LifePod>
-                  </DisplayBox>
-                  <DisplayBox>
+                  </SubSection>
+                  <SubSection>
                     <h3>Processing Queue</h3>
                     <LifePod
                       dependencies={{
@@ -260,8 +271,8 @@ export class App extends Component {
                   </span>
                       )}
                     </LifePod>
-                  </DisplayBox>
-                  <DisplayBox>
+                  </SubSection>
+                  <SubSection>
                     <h3>Existing</h3>
                     <LifePod
                       dependencies={{
@@ -272,10 +283,10 @@ export class App extends Component {
                         <pre>{JSON.stringify(existing, null, '  ')}</pre>
                       )}
                     </LifePod>
-                  </DisplayBox>
-                </Row>
-                <Row>
-                  <DisplayBox>
+                  </SubSection>
+                </Section>
+                <Section>
+                  <SubSection>
                     <LifePod
                       dependencies={{
                         errorMap: 'ErrorMap',
@@ -318,8 +329,8 @@ export class App extends Component {
                         );
                       }}
                     </LifePod>
-                  </DisplayBox>
-                </Row>
+                  </SubSection>
+                </Section>
               </Incarnate>
             </SectionGrid>
           </Base>
