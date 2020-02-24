@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import styled, {createGlobalStyle} from 'styled-components';
 import Incarnate, {LifePod} from 'incarnate-dom';
 import UUIDV4 from 'uuid/v4';
-import ItemQueueProcessor from './App/Utils/ItemQueueProcessor';
+import {ItemQueueProcessor} from './index';
 
 const GlobalStyle = createGlobalStyle`
 html,

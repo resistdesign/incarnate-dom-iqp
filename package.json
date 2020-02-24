@@ -1,18 +1,23 @@
 {
-  "name": "transformpair",
+  "name": "incarnate-dom-iqp",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "main": "src/index.jsx",
+  "files": [
+    "src/index.jsx",
+    "src/ItemQueueProcessor/"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "incarnate-dom": "^4.0.0",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0",
+    "react-dom": "^16.12.0"
+  },
+  "devDependencies": {
+    "@material-ui/core": "^4.9.4",
+    "@resistdesign/sracl-mui-theme": "^1.1.0",
     "styled-components": "^5.0.0",
     "uuid": "^3.4.0"
   }
