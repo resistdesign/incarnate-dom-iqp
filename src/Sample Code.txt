@@ -1,0 +1,66 @@
+// Dependencies
+
+export const Dependencies = (
+  <Incarnate
+        name='ItemQueueProcessorDemo'
+      >
+        <Fragment>
+          <LifePod
+            name='ParentItemID'
+            factory={() => UUIDV4()}
+          />
+          <LifePod
+            name='ItemProcessor'
+            dependencies={{
+              parentItemID: 'ParentItemID'
+            }}
+            strict
+            factory={({parentItemID}) => async ({id, ...item} = {}) => await new Promise((res, rej) => setTimeout(
+              () => {
+                PROCESSING_COUNT_MAP[id] = typeof PROCESSING_COUNT_MAP[id] === 'number' ?
+                  PROCESSING_COUNT_MAP[id] + 1 :
+                  1;
+
+                return Math.random() < 0.25 ?
+                  rej(new Error('Unknown Error')) :
+                  res({
+                    id: `SAVED_${id}`,
+                    processedXTimes: PROCESSING_COUNT_MAP[id],
+                    parentItemID,
+                    ...item
+                  });
+              },
+              2500
+            ))}
+          />
+          <LifePod
+            name='RunningCount'
+            factory={() => 0}
+          />
+          <LifePod
+            name='Map'
+            factory={() => ({})}
+          />
+          <LifePod
+            name='ErrorMap'
+            factory={() => ({})}
+          />
+          <LifePod
+            name='Existing'
+            factory={() => ({})}
+          />
+          {/* Declare the ItemQueueProcessor */}
+          <ItemQueueProcessor
+            name='MapQueueProcessor'
+            shared={{
+              InputMap: 'Map',
+              OutputMap: 'Existing',
+              ItemProcessor: 'ItemProcessor',
+              ErrorMap: 'ErrorMap'
+            }}
+            batchSize={3}
+            batchDelayMS={1500}
+          />
+        </Fragment>
+  </Incarnate>
+);

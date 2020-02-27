@@ -24,15 +24,19 @@ import {
   ThemeProvider
 } from '@material-ui/core/styles';
 import SRACLMUITheme from '@resistdesign/sracl-mui-theme';
-import {Light as SyntaxHighlighter} from 'react-syntax-highlighter';
+import {Light as SyntaxHighlighter, PrismLight as PrismSyntaxHighlighter} from 'react-syntax-highlighter';
 import {hybrid} from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import {duotoneSpace} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import JSONLanguage from 'react-syntax-highlighter/dist/esm/languages/hljs/json';
+import JSXLanguage from 'react-syntax-highlighter/dist/esm/languages/prism/jsx';
 import {ItemQueueProcessor} from './index';
 import Logo from './App/Assets/Graphics/Incarnate Logo Icon 2020.svg';
 import GHRepo from './App/Assets/Graphics/github-repo.svg';
 import GHRepoMessage from './App/Assets/Graphics/github-repo-message.svg';
+import SampleCode from '!raw!./Sample Code.txt';
 
 SyntaxHighlighter.registerLanguage('json', JSONLanguage);
+PrismSyntaxHighlighter.registerLanguage('jsx', JSXLanguage);
 
 const THEME = createMuiTheme(SRACLMUITheme);
 const GlobalStyle = createGlobalStyle`
@@ -113,7 +117,11 @@ const SectionGrid = styled(Area)`
   grid-gap: 4em;
   box-sizing: border-box;
   
-  @media (max-width: 620px) {
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 `;
@@ -129,16 +137,17 @@ const SubSectionBox = styled.div`
     flex: 10 auto;
   }
 `;
-const RowBox = styled(SubSectionBox)`
-  display: grid;
-  grid-auto-flow: column;
-  align-items: center;
-  justify-content: flex-start;
-  grid-gap: 1em;
-`;
 const CodeBox = styled.div`
-  max-height: 15em;
+  height: 10em;
   overflow: auto;
+  
+  & > * {
+    min-height: 100%;
+    margin: 0;
+  }
+`;
+const OutputCodeBox = styled(CodeBox)`
+  height: 20em;
 `;
 const Section = ({title = '', children, ...props} = {}) => (
   <Box
@@ -252,7 +261,14 @@ export class App extends Component {
                 <Title
                   variant='h5'
                 >
-                  Incarnate DOM <Title display='inline' variant='h5' color='textSecondary'>Item Queue Processor</Title>
+                  Incarnate DOM&nbsp;
+                  <Title
+                    display='inline'
+                    variant='inherit'
+                    color='textSecondary'
+                  >
+                    Item Queue Processor
+                  </Title>
                 </Title>
               </HeaderBox>
               <SectionGrid>
@@ -265,7 +281,7 @@ export class App extends Component {
                       >
                         <Box
                           width='100%'
-                          height='15em'
+                          height='10em'
                           display='flex'
                           alignItems='center'
                           justifyContent='center'
@@ -415,7 +431,7 @@ export class App extends Component {
                           }}
                         >
                           {({existing}) => (
-                            <CodeBox>
+                            <OutputCodeBox>
                               <SyntaxHighlighter
                                 language='json'
                                 style={hybrid}
@@ -424,7 +440,7 @@ export class App extends Component {
                               >
                                 {JSON.stringify(existing, null, '  ')}
                               </SyntaxHighlighter>
-                            </CodeBox>
+                            </OutputCodeBox>
                           )}
                         </LifePod>
                       </CardContent>
@@ -493,6 +509,27 @@ export class App extends Component {
                         );
                       }}
                     </LifePod>
+                  </SubSection>
+                </Section>
+              </Area>
+              <Area>
+                <Section>
+                  <SubSection>
+                    <Card>
+                      <CardHeader
+                        title='Example Code'
+                      />
+                      <CardContent>
+                        <PrismSyntaxHighlighter
+                          language='jsx'
+                          style={duotoneSpace}
+                          showLineNumbers
+                          wrapLines
+                        >
+                          {SampleCode}
+                        </PrismSyntaxHighlighter>
+                      </CardContent>
+                    </Card>
                   </SubSection>
                 </Section>
               </Area>
