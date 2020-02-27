@@ -11,9 +11,7 @@ import {
   Card,
   CardHeader,
   CardContent,
-  CardActions,
   CardMedia,
-  CardActionArea,
   CssBaseline,
   Typography,
   List,
@@ -31,6 +29,8 @@ import {hybrid} from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import JSONLanguage from 'react-syntax-highlighter/dist/esm/languages/hljs/json';
 import {ItemQueueProcessor} from './index';
 import Logo from './App/Assets/Graphics/Incarnate Logo Icon 2020.svg';
+import GHRepo from './App/Assets/Graphics/github-repo.svg';
+import GHRepoMessage from './App/Assets/Graphics/github-repo-message.svg';
 
 SyntaxHighlighter.registerLanguage('json', JSONLanguage);
 
@@ -63,6 +63,36 @@ const HeaderBox = styled(Box)`
 `;
 const LogoImg = styled.img`
   width: 7.5em;
+`;
+const GHRepoMessageCornerImg = styled.img`
+  width: 10em;
+`;
+const GHRepoCornerImg = styled.img`
+  width: 10em;
+  margin-left: -10em;
+`;
+const GHRepoAnchor = styled.a`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  & > ${GHRepoMessageCornerImg} {
+    width: 5em;
+    
+    transition: width 100ms ease-in-out;
+  }
+  
+  &:hover {
+    & > ${GHRepoMessageCornerImg} {
+      width: 10em;
+    }
+  }
+`;
+const GHRepoCorner = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
 `;
 const Title = styled(Typography).attrs(p => ({
   ...p,
@@ -466,6 +496,19 @@ export class App extends Component {
                   </SubSection>
                 </Section>
               </Area>
+              <GHRepoCorner>
+                <GHRepoAnchor
+                  target='_blank'
+                  href='https://github.com/resistdesign/incarnate-dom-iqp'
+                >
+                  <GHRepoMessageCornerImg
+                    src={GHRepoMessage}
+                  />
+                  <GHRepoCornerImg
+                    src={GHRepo}
+                  />
+                </GHRepoAnchor>
+              </GHRepoCorner>
             </Base>
           </ThemeProvider>
         </Fragment>
